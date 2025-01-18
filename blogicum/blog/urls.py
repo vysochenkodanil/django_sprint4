@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import PostListView, CategoryPostsView, PostDetailView
+from .views import PostListView, CategoryPostsView, PostDetailView, PostCreateView
+from .views import profile
+
 
 app_name = 'blog'
 
@@ -11,5 +13,7 @@ urlpatterns = [
         CategoryPostsView.as_view(),
         name='category_posts'
     ),
+    path('blog/create/', PostCreateView.as_view(), name='create_post'),
+    path('profile/<str:username>/', profile, name='profile'),
     
 ]

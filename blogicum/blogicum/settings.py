@@ -150,3 +150,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_FAILURE_VIEW = 'pages.views.csrf_failure' 
 #моя катномная моделька)))
 AUTH_USER_MODEL = 'user.MyUser' 
+# адрес страницы после редиректа
+LOGIN_REDIRECT_URL = 'blog:index' 

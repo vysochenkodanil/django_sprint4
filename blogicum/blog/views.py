@@ -1,11 +1,16 @@
 from django.conf import settings
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
+from django.urls import reverse_lazy
 from .models import Category, Post
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView
+from .forms import PostForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth import get_user_model
 
 
+User = get_user_model()
 
 class PostListView(ListView):
     model = Post
@@ -60,3 +65,19 @@ class PostDetailView(DetailView):
             is_published=True,
             category__is_published=True
         )
+    
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/create.html'
+    success_url = reverse_lazy('blog:index')
+
+    def form_valid(self, form):
+        # присваиваем автора, что б не прошляпить
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+    
+
+def profile(request, username):
+    user = get_object_or_404(User, username=username)
+    return render(request, 'blog/profile.html', {'profile_user': user})
