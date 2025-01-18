@@ -1,5 +1,4 @@
 from django.urls import path
-
 from .views import PostListView, CategoryPostsView, PostDetailView
 
 app_name = 'blog'
@@ -12,4 +11,5 @@ urlpatterns = [
         CategoryPostsView.as_view(),
         name='category_posts'
     ),
+    
 ]

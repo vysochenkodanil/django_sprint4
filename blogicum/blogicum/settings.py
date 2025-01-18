@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'pages.apps.PagesConfig',
     'blog.apps.BlogConfig',
     'django_bootstrap5',
+    'user.apps.UserConfig',
 ]
 
 MIDDLEWARE = [
@@ -147,3 +148,5 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_FAILURE_VIEW = 'pages.views.csrf_failure' 
+#моя катномная моделька)))
+AUTH_USER_MODEL = 'user.MyUser' 

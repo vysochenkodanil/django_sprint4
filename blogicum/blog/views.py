@@ -25,8 +25,7 @@ class PostListView(ListView):
 class CategoryPostsView(ListView):
     template_name = 'blog/category.html'
     context_object_name = 'post_list'
-    # Количество постов на странице
-    paginate_by = 10  
+    paginate_by = settings.POSTS_PER_PAGE  
 
     def get_queryset(self):
         current_time = timezone.now()
