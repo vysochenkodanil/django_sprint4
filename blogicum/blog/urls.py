@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import PostListView, CategoryPostsView, PostDetailView, PostCreateView
-from .views import profile
+from django.contrib.auth import views as auth_views
+from .views import PostListView, CategoryPostsView, PostDetailView, PostCreateView, ProfileView
+from .views import EditProfileView 
 
-
-app_name = 'blog'
+app_name = 'blog'  # Пространство имён для приложения blog
 
 urlpatterns = [
     path('', PostListView.as_view(), name='index'),
@@ -14,6 +14,6 @@ urlpatterns = [
         name='category_posts'
     ),
     path('blog/create/', PostCreateView.as_view(), name='create_post'),
-    path('profile/<str:username>/', profile, name='profile'),
-    
+    path('profile/<str:username>/', ProfileView.as_view(), name='profile'),
+    path('edit_profile/', EditProfileView.as_view(), name='edit_profile'),
 ]

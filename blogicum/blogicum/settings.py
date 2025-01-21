@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
 TITLE_MAX_LENGTH = 256
 
 # Количество постов на главной странице
-POSTS_PER_PAGE = 5
+POSTS_PER_PAGE = 10
 
 # Максимальное колличество выводимых символов в модели
 MAX_LEM_WORDS = 15
@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'pages.apps.PagesConfig',
     'blog.apps.BlogConfig',
     'django_bootstrap5',
-    'user.apps.UserConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -147,8 +147,13 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 CSRF_FAILURE_VIEW = 'pages.views.csrf_failure' 
-#моя катномная моделька)))
-AUTH_USER_MODEL = 'user.MyUser' 
 # адрес страницы после редиректа
 LOGIN_REDIRECT_URL = 'blog:index' 
+# Подключаем бэкенд filebased.EmailBackend:(Практикум)
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+# Указываем директорию, в которую будут сохраняться файлы писем:(Практикум)
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+#страница логина
+LOGIN_URL = 'login' 
