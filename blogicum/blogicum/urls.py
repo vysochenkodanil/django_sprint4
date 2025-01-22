@@ -5,7 +5,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 from blog.views import ProfileView
-from django.contrib.auth.forms import UserChangeForm
+from django.conf import settings
+from django.conf.urls.static import static
 # Ошибка 404
 handler404 = 'pages.views.page_not_found'
 # Ошибка 500
@@ -57,3 +58,5 @@ urlpatterns = [
         name='password_reset_complete',
     ),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

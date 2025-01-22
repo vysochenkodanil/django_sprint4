@@ -1,4 +1,4 @@
-from pages.views import server_error
+import os
 """
 Django settings for blogicum project.
 
@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-6b(f)3uxol6bt)9(&i#7+$ie8o-#w$j498px=sea2&zvbckd_('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -158,4 +158,9 @@ EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 #страница логина
 LOGIN_URL = 'login' 
 
-MEDIA_ROOT = BASE_DIR / 'media' # Сюда положу картинки
+
+ # Указываем базовый каталог проекта
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Настройки для медиафайлов
+MEDIA_URL = '/media/'  # URL-префикс для медиафайлов
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
