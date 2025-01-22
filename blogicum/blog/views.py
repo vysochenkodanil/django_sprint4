@@ -19,7 +19,6 @@ from django.contrib.auth.models import User
 
 User = get_user_model()
 
-
 class EditProfileView(LoginRequiredMixin, UpdateView):
     model = User
     form_class = EditProfileForm
