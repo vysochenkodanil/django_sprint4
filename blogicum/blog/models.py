@@ -4,7 +4,6 @@ from django.db import models
 
 User = get_user_model()
 
-
 class CreatedPubModel(models.Model):
     is_published = models.BooleanField(
         default=True,

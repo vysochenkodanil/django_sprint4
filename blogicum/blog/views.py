@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.urls import reverse_lazy
 from .models import Category, Post
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from .forms import PostForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
@@ -14,10 +14,28 @@ from django.views.generic import UpdateView
 from django.urls import reverse_lazy
 from .forms import EditProfileForm  # Импортируем кастомную форму
 from django.contrib.auth.models import User
-
+from django.views.generic import UpdateView, DeleteView
 
 
 User = get_user_model()
+
+class PostUpdateView(LoginRequiredMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/create.html'
+    success_url = reverse_lazy('profile')
+
+    def form_valid(self, form):
+        if form.instance.pub_date > timezone.now():
+            form.instance.is_published = False
+        else:
+            form.instance.is_published = True
+        return super().form_valid(form)
+
+class PostDeleteView(LoginRequiredMixin, DeleteView):
+    model = Post
+    template_name = 'blog/create.html'
+    success_url = reverse_lazy('profile')
 
 class EditProfileView(LoginRequiredMixin, UpdateView):
     model = User
@@ -45,6 +63,29 @@ class ProfileContextMixin(SingleObjectMixin):
         context['page_obj'] = page_obj
         return context
 
+# class ProfileView(DetailView):
+#     model = User  # Модель, с которой работает представление
+#     template_name = 'blog/profile.html'  # Шаблон для отображения
+#     context_object_name = 'profile'  # Имя объекта в контексте шаблона
+#     slug_field = 'username'  # Поле для поиска пользователя
+#     slug_url_kwarg = 'username'  # Имя параметра URL
+
+#     def get_context_data(self, **kwargs):
+#         # Получаем контекст от родительского класса
+#         context = super().get_context_data(**kwargs)
+#         # Получаем объект пользователя
+#         profile = self.object
+#         # Получаем публикации пользователя (если у вас есть модель Post)
+#         posts = Post.objects.filter(author=profile).order_by('-created_at')
+#         # Пагинация
+#         paginator = Paginator(posts, settings.POSTS_PER_PAGE)
+#         page_number = self.request.GET.get('page')
+#         page_obj = paginator.get_page(page_number)
+#         # Добавляем публикации в контекст
+#         context['page_obj'] = page_obj
+#         return context
+
+
 class ProfileView(DetailView):
     model = User  # Модель, с которой работает представление
     template_name = 'blog/profile.html'  # Шаблон для отображения
@@ -57,15 +98,15 @@ class ProfileView(DetailView):
         context = super().get_context_data(**kwargs)
         # Получаем объект пользователя
         profile = self.object
-        # Получаем публикации пользователя (если у вас есть модель Post)
-        posts = Post.objects.filter(author=profile).order_by('-created_at')
-        # Пагинация
+        # Получаем публикации пользователя
+        posts = Post.objects.filter(author=profile).order_by('-pub_date')
         paginator = Paginator(posts, settings.POSTS_PER_PAGE)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         # Добавляем публикации в контекст
         context['page_obj'] = page_obj
         return context
+
 
 class PostListView(ListView):
     model = Post
@@ -124,8 +165,13 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     form_class = PostForm
     template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:index')
+    #success_url = reverse_lazy('profile')
 
     def form_valid(self, form):
-        # Присваиваем автора, чтобы не просрать
         form.instance.author = self.request.user
+        if form.instance.pub_date > timezone.now():
+            form.instance.is_published = False
+        else:
+            form.instance.is_published = True
         return super().form_valid(form)
+    
