@@ -5,6 +5,8 @@ from .models import Category, Location, Post
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
+    """Административная панель для модели Post."""
+
     list_display = (
         'title',
         'text',
@@ -18,7 +20,7 @@ class PostAdmin(admin.ModelAdmin):
     list_editable = (
         'text',
         'location',
-        'category'
+        'category',
     )
     search_fields = ('title', 'author',)
     list_filter = ('category', 'location',)
@@ -27,8 +29,12 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    #list_display = ('title', 'is_published', 'created_at')
-    list_display = ['title', 'is_published']
+    """Административная панель для модели Category."""
+
+    list_display = (
+        'title',
+        'is_published',
+    )
     list_editable = ('is_published',)
     search_fields = ('title',)
     list_filter = ('is_published',)
@@ -36,8 +42,12 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    #list_display = ('name', 'is_published', 'created_at')
-    list_display = ['name', 'is_published']
+    """Административная панель для модели Location."""
+
+    list_display = (
+        'name',
+        'is_published',
+    )
     list_editable = ('is_published',)
     search_fields = ('name',)
     list_filter = ('is_published',)
