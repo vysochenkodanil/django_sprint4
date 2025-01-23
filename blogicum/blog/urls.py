@@ -42,13 +42,22 @@ urlpatterns = [
     path('posts/create/', PostCreateView.as_view(), name='post_create'),
 
     # Редактирование поста
-    path('posts/<int:post_id>/edit/', PostUpdateView.as_view(), name='edit_post'),
+    path(
+        'posts/<int:post_id>/edit/',
+        PostUpdateView.as_view(),
+        name='edit_post'),
 
     # Удаление поста
-    path('posts/<int:post_id>/delete/', PostDeleteView.as_view(), name='delete_post'),
+    path(
+        'posts/<int:post_id>/delete/',
+        PostDeleteView.as_view(),
+        name='delete_post'),
 
     # Создание комментария
-    path('posts/<int:post_id>/comment/', CommentCreateView.as_view(), name='add_comment'),
+    path(
+        'posts/<int:post_id>/comment/',
+        CommentCreateView.as_view(),
+        name='add_comment'),
 
     # Редактирование комментария
     path(

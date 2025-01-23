@@ -72,7 +72,8 @@ class PostDetailView(DetailView):
         """Возвращает пост, если он опубликован или пользователь является автором."""
         post = super().get_object(queryset=queryset)
         current_time = timezone.now()
-        if (post.is_published and post.pub_date <= current_time and post.category.is_published) or post.author == self.request.user:
+        if (post.is_published and post.pub_date
+                <= current_time and post.category.is_published) or post.author == self.request.user:
             return post
         raise Http404("Пост не найден или недоступен")
 
@@ -102,7 +103,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         """Перенаправляет на страницу профиля автора после создания поста."""
-        return reverse_lazy('blog:profile', kwargs={'username': self.request.user.username})
+        return reverse_lazy('blog:profile', kwargs={
+                            'username': self.request.user.username})
 
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -123,7 +125,8 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         """Перенаправляет на страницу поста после успешного редактирования."""
-        return reverse_lazy('blog:post_detail', kwargs={'post_id': self.object.pk})
+        return reverse_lazy('blog:post_detail', kwargs={
+                            'post_id': self.object.pk})
 
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -158,7 +161,8 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         """Перенаправляет на страницу поста после создания комментария."""
-        return reverse_lazy('blog:post_detail', kwargs={'post_id': self.kwargs['post_id']})
+        return reverse_lazy('blog:post_detail', kwargs={
+                            'post_id': self.kwargs['post_id']})
 
 
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -179,7 +183,8 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         """Перенаправляет на страницу поста после успешного редактирования."""
-        return reverse_lazy('blog:post_detail', kwargs={'post_id': self.kwargs['post_id']})
+        return reverse_lazy('blog:post_detail', kwargs={
+                            'post_id': self.kwargs['post_id']})
 
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -199,7 +204,8 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         """Перенаправляет на страницу поста после удаления комментария."""
-        return reverse_lazy('blog:post_detail', kwargs={'post_id': self.kwargs['post_id']})
+        return reverse_lazy('blog:post_detail', kwargs={
+                            'post_id': self.kwargs['post_id']})
 
     def get_context_data(self, **kwargs):
         """Не передаёт объект формы в контекст для страницы удаления."""
@@ -233,7 +239,8 @@ class ProfileView(DetailView):
                 category__is_published=True
             )
 
-        posts = posts.annotate(comment_count=Count('comments')).order_by('-pub_date')
+        posts = posts.annotate(comment_count=Count(
+            'comments')).order_by('-pub_date')
         paginator = Paginator(posts, settings.POSTS_PER_PAGE)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -253,4 +260,5 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         """Перенаправляет на страницу профиля после редактирования."""
-        return reverse_lazy('blog:profile', kwargs={'username': self.request.user.username})
+        return reverse_lazy('blog:profile', kwargs={
+                            'username': self.request.user.username})

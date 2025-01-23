@@ -12,7 +12,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='post',
-            options={'ordering': ['-pub_date'], 'verbose_name': 'публикация', 'verbose_name_plural': 'Публикации'},
+            options={
+                'ordering': ['-pub_date'],
+                'verbose_name': 'публикация',
+                'verbose_name_plural': 'Публикации'},
         ),
         migrations.RemoveField(
             model_name='comment',

@@ -58,19 +58,20 @@ urlpatterns = [
     # path('auth/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
 
     path(
-    'auth/password_change/',
-    auth_views.PasswordChangeView.as_view(
-        template_name='registration/password_change_form.html',  # Ваш шаблон
-        success_url=reverse_lazy('password_change_done'),  # Перенаправление после успешного изменения
-    ),
-    name='password_change',
+        'auth/password_change/',
+        auth_views.PasswordChangeView.as_view(
+            template_name='registration/password_change_form.html',  # Ваш шаблон
+            # Перенаправление после успешного изменения
+            success_url=reverse_lazy('password_change_done'),
+        ),
+        name='password_change',
     ),
     path(
-    'auth/password_change/done/',
-    auth_views.PasswordChangeDoneView.as_view(
-        template_name='registration/password_change_done.html',  # Ваш шаблон
-    ),
-    name='password_change_done',
+        'auth/password_change/done/',
+        auth_views.PasswordChangeDoneView.as_view(
+            template_name='registration/password_change_done.html',  # Ваш шаблон
+        ),
+        name='password_change_done',
     ),
 
     # Сброс пароля
@@ -93,4 +94,5 @@ urlpatterns = [
 
 # Подключение медиафайлов в режиме DEBUG
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
