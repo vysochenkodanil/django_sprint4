@@ -19,13 +19,14 @@ User = get_user_model()
 
 class PostListView(ListView):
     """Отображает список опубликованных постов."""
+
     model = Post
     template_name = 'blog/index.html'
     context_object_name = 'post_list'
     paginate_by = settings.POSTS_PER_PAGE
 
     def get_queryset(self):
-        """Возвращает опубликованные посты с аннотацией количества комментариев."""
+        """Возвращает опубликованные посты с количеством комментариев."""
         current_time = timezone.now()
         return Post.objects.filter(
             pub_date__lte=current_time,
@@ -36,6 +37,7 @@ class PostListView(ListView):
 
 class CategoryPostsView(ListView):
     """Отображает список постов в определённой категории."""
+
     template_name = 'blog/category.html'
     context_object_name = 'post_list'
     paginate_by = settings.POSTS_PER_PAGE
@@ -63,17 +65,25 @@ class CategoryPostsView(ListView):
 
 class PostDetailView(DetailView):
     """Отображает детали поста."""
+
     model = Post
     template_name = 'blog/detail.html'
     context_object_name = 'post'
     pk_url_kwarg = 'post_id'
 
     def get_object(self, queryset=None):
-        """Возвращает пост, если он опубликован или пользователь является автором."""
+        """
+        Возвращает пост, если он опубликован или пользователь является автором.
+
+        Если пост не опубликован или недоступен, вызывает исключение Http404.
+        """
         post = super().get_object(queryset=queryset)
         current_time = timezone.now()
-        if (post.is_published and post.pub_date
-                <= current_time and post.category.is_published) or post.author == self.request.user:
+        if (
+            post.is_published
+            and post.pub_date <= current_time
+            and post.category.is_published
+        ) or post.author == self.request.user:
             return post
         raise Http404("Пост не найден или недоступен")
 
@@ -88,6 +98,7 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     """Создание нового поста."""
+
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
@@ -109,6 +120,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """Редактирование поста."""
+
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
@@ -131,6 +143,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """Удаление поста."""
+
     model = Post
     template_name = 'blog/create.html'
     pk_url_kwarg = 'post_id'
@@ -148,6 +161,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     """Создание нового комментария."""
+
     model = Comment
     form_class = CommentForm
     template_name = 'includes/comments.html'
@@ -167,6 +181,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """Редактирование комментария."""
+
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment.html'
@@ -189,6 +204,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """Удаление комментария."""
+
     model = Comment
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
@@ -217,6 +233,7 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 class ProfileView(DetailView):
     """Отображает профиль пользователя."""
+
     model = User
     template_name = 'blog/profile.html'
     context_object_name = 'profile'
@@ -250,6 +267,7 @@ class ProfileView(DetailView):
 
 class EditProfileView(LoginRequiredMixin, UpdateView):
     """Редактирование профиля пользователя."""
+
     model = User
     form_class = EditProfileForm
     template_name = 'blog/user.html'

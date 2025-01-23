@@ -37,30 +37,10 @@ urlpatterns = [
 
     # Профиль пользователя
     path('profile/<str:username>/', ProfileView.as_view(), name='profile'),
-
-    # Изменение пароля
-    # path(
-    #     'password_change/',
-    #     auth_views.PasswordChangeView.as_view(
-    #         template_name='registration/password_change_form.html',
-    #         success_url=reverse_lazy('password_change_done'),
-    #     ),
-    #     name='password_change',
-    # ),
-    # path(
-    #     'password_change/done/',
-    #     auth_views.PasswordChangeDoneView.as_view(
-    #         template_name='registration/password_change_done.html',
-    #     ),
-    #     name='password_change_done',
-    # ),
-    # path('auth/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
-    # path('auth/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
-
     path(
         'auth/password_change/',
         auth_views.PasswordChangeView.as_view(
-            template_name='registration/password_change_form.html',  # Ваш шаблон
+            template_name='registration/password_change_form.html',
             # Перенаправление после успешного изменения
             success_url=reverse_lazy('password_change_done'),
         ),
@@ -69,7 +49,7 @@ urlpatterns = [
     path(
         'auth/password_change/done/',
         auth_views.PasswordChangeDoneView.as_view(
-            template_name='registration/password_change_done.html',  # Ваш шаблон
+            template_name='registration/password_change_done.html',
         ),
         name='password_change_done',
     ),
