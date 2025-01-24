@@ -63,12 +63,9 @@ class CommentAdmin(admin.ModelAdmin):
         'author',
         'text',
         'created_at',
-        'updated_at',
-        'is_published',
     )
     list_editable = (
         'text',
-        'is_published',
     )
     search_fields = (
         'text',
@@ -79,10 +76,8 @@ class CommentAdmin(admin.ModelAdmin):
         'post',
         'author',
         'created_at',
-        'is_published',
     )
     list_display_links = ('id',)
-    readonly_fields = ('created_at', 'updated_at')
 
     def save_model(self, request, obj, form, change):
         if not obj.author_id:
