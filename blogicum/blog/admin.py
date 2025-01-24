@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Location, Post
+from .models import Category, Location, Post, Comment
 
 
 @admin.register(Post)
@@ -51,3 +51,40 @@ class LocationAdmin(admin.ModelAdmin):
     list_editable = ('is_published',)
     search_fields = ('name',)
     list_filter = ('is_published',)
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    """Административная панель для модели Comment."""
+
+    list_display = (
+        'id',
+        'post',
+        'author',
+        'text',
+        'created_at',
+        'updated_at',
+        'is_published',
+    )
+    list_editable = (
+        'text',
+        'is_published',
+    )
+    search_fields = (
+        'text',
+        'author__username',
+        'post__title',
+    )
+    list_filter = (
+        'post',
+        'author',
+        'created_at',
+        'is_published',
+    )
+    list_display_links = ('id',)
+    readonly_fields = ('created_at', 'updated_at')
+
+    def save_model(self, request, obj, form, change):
+        if not obj.author_id:
+            obj.author = request.user
+        super().save_model(request, obj, form, change)

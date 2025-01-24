@@ -25,8 +25,10 @@ SECRET_KEY = 'django-insecure-6b(f)3uxol6bt)9(&i#7+$ie8o-#w$j498px=sea2&zvbckd_(
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
+    # 'localhost',
+    # '127.0.0.1',
+    'www.danilvysochenko.pythonanywhere.com',
+    'danilvysochenko.pythonanywhere.com',
 ]
 
 # Максимальная длина для заголовка

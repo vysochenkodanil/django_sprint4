@@ -17,7 +17,35 @@ from .forms import PostForm, CommentForm, EditProfileForm
 User = get_user_model()
 
 
-class PostListView(ListView):
+class PublishedPostsMixin:
+    """Миксин для выборки опубликованных постов."""
+
+    def get_published_posts(self):
+        """Возвращает опубликованные посты."""
+        current_time = timezone.now()
+        return Post.objects.filter(
+            pub_date__lte=current_time,
+            is_published=True,
+            category__is_published=True
+        ).annotate(comment_count=Count('comments')).order_by('-pub_date')
+
+
+class AuthorCheckMixin(UserPassesTestMixin):
+    """Миксин для проверки авторства."""
+
+    def test_func(self):
+        """Проверяет, является ли пользователь автором объекта."""
+        obj = self.get_object()
+        return self.request.user == obj.author
+
+    def handle_no_permission(self):
+        """Обрабатывает случай, если пользователь не автор."""
+        if isinstance(self.get_object(), Post):
+            return redirect('blog:post_detail', post_id=self.kwargs['post_id'])
+        raise Http404("Объект не найден или недоступен")
+
+
+class PostListView(PublishedPostsMixin, ListView):
     """Отображает список опубликованных постов."""
 
     model = Post
@@ -27,15 +55,10 @@ class PostListView(ListView):
 
     def get_queryset(self):
         """Возвращает опубликованные посты с количеством комментариев."""
-        current_time = timezone.now()
-        return Post.objects.filter(
-            pub_date__lte=current_time,
-            is_published=True,
-            category__is_published=True
-        ).annotate(comment_count=Count('comments')).order_by('-pub_date')
+        return self.get_published_posts()
 
 
-class CategoryPostsView(ListView):
+class CategoryPostsView(PublishedPostsMixin, ListView):
     """Отображает список постов в определённой категории."""
 
     template_name = 'blog/category.html'
@@ -44,23 +67,12 @@ class CategoryPostsView(ListView):
 
     def get_queryset(self):
         """Возвращает опубликованные посты в выбранной категории."""
-        current_time = timezone.now()
         self.category = get_object_or_404(
             Category,
             slug=self.kwargs['category_slug'],
             is_published=True
         )
-        return Post.objects.filter(
-            category=self.category,
-            pub_date__lte=current_time,
-            is_published=True
-        ).annotate(comment_count=Count('comments')).order_by('-pub_date')
-
-    def get_context_data(self, **kwargs):
-        """Добавляет категорию в контекст."""
-        context = super().get_context_data(**kwargs)
-        context['category'] = self.category
-        return context
+        return self.get_published_posts().filter(category=self.category)
 
 
 class PostDetailView(DetailView):
@@ -106,10 +118,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         """Устанавливает автора поста и проверяет дату публикации."""
         form.instance.author = self.request.user
-        if form.instance.pub_date > timezone.now():
-            form.instance.is_published = False
-        else:
-            form.instance.is_published = True
+        form.instance.is_published = form.instance.pub_date <= timezone.now()
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -118,7 +127,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
                             'username': self.request.user.username})
 
 
-class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class PostUpdateView(LoginRequiredMixin, AuthorCheckMixin, UpdateView):
     """Редактирование поста."""
 
     model = Post
@@ -126,37 +135,19 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'blog/create.html'
     pk_url_kwarg = 'post_id'
 
-    def test_func(self):
-        """Проверяет, является ли пользователь автором поста."""
-        post = self.get_object()
-        return self.request.user == post.author
-
-    def handle_no_permission(self):
-        """Перенаправляет на страницу поста, если пользователь не автор."""
-        return redirect('blog:post_detail', post_id=self.kwargs['post_id'])
-
     def get_success_url(self):
         """Перенаправляет на страницу поста после успешного редактирования."""
         return reverse_lazy('blog:post_detail', kwargs={
                             'post_id': self.object.pk})
 
 
-class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class PostDeleteView(LoginRequiredMixin, AuthorCheckMixin, DeleteView):
     """Удаление поста."""
 
     model = Post
     template_name = 'blog/create.html'
     pk_url_kwarg = 'post_id'
     success_url = reverse_lazy('blog:index')
-
-    def test_func(self):
-        """Проверяет, является ли пользователь автором поста."""
-        post = self.get_object()
-        return self.request.user == post.author
-
-    def handle_no_permission(self):
-        """Перенаправляет на страницу поста, если пользователь не автор."""
-        return redirect('blog:post_detail', post_id=self.kwargs['post_id'])
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
@@ -179,7 +170,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
                             'post_id': self.kwargs['post_id']})
 
 
-class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class CommentUpdateView(LoginRequiredMixin, AuthorCheckMixin, UpdateView):
     """Редактирование комментария."""
 
     model = Comment
@@ -187,36 +178,18 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
 
-    def test_func(self):
-        """Проверяет, является ли пользователь автором комментария."""
-        comment = self.get_object()
-        return self.request.user == comment.author
-
-    def handle_no_permission(self):
-        """Возвращает 404, если пользователь не автор."""
-        raise Http404("Комментарий не найден или недоступен")
-
     def get_success_url(self):
         """Перенаправляет на страницу поста после успешного редактирования."""
         return reverse_lazy('blog:post_detail', kwargs={
                             'post_id': self.kwargs['post_id']})
 
 
-class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class CommentDeleteView(LoginRequiredMixin, AuthorCheckMixin, DeleteView):
     """Удаление комментария."""
 
     model = Comment
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
-
-    def test_func(self):
-        """Проверяет, является ли пользователь автором комментария."""
-        comment = self.get_object()
-        return self.request.user == comment.author
-
-    def handle_no_permission(self):
-        """Возвращает 404, если пользователь не автор."""
-        raise Http404("Комментарий не найден или недоступен")
 
     def get_success_url(self):
         """Перенаправляет на страницу поста после удаления комментария."""
