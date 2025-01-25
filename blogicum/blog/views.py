@@ -150,11 +150,7 @@ class CommentUpdateView(LoginRequiredMixin, AuthorCheckMixin, UpdateView):
     form_class = CommentForm
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
-
-    def get_success_url(self):
-        """Перенаправляет на страницу поста после успешного редактирования."""
-        return reverse_lazy('blog:post_detail', kwargs={
-                            'post_id': self.object.post.id})
+    success_url = reverse_lazy('blog:index')
 
 
 class CommentDeleteView(LoginRequiredMixin, AuthorCheckMixin, DeleteView):
