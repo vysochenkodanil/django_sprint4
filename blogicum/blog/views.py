@@ -1,48 +1,21 @@
 from django.conf import settings
-from django.shortcuts import get_object_or_404, redirect
-from django.utils import timezone
-from django.urls import reverse_lazy
-from django.views.generic import (
-    ListView, DetailView, CreateView, UpdateView, DeleteView
-)
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views.generic import (
+    ListView, DetailView, CreateView, UpdateView, DeleteView
+)
 
-from .models import Category, Post, Comment
-from .forms import PostForm, CommentForm, EditProfileForm
+from .forms import CommentForm, EditProfileForm, PostForm
+from .mixins import AuthorCheckMixin, PublishedPostsMixin
+from .models import Category, Comment, Post
 
 User = get_user_model()
-
-
-class PublishedPostsMixin:
-    """Миксин для выборки опубликованных постов."""
-
-    def get_published_posts(self):
-        """Возвращает опубликованные посты."""
-        current_time = timezone.now()
-        return Post.objects.filter(
-            pub_date__lte=current_time,
-            is_published=True,
-            category__is_published=True
-        ).annotate(comment_count=Count('comments')).order_by('-pub_date')
-
-
-class AuthorCheckMixin(UserPassesTestMixin):
-    """Миксин для проверки авторства."""
-
-    def test_func(self):
-        """Проверяет, является ли пользователь автором объекта."""
-        obj = self.get_object()
-        return self.request.user == obj.author
-
-    def handle_no_permission(self):
-        """Обрабатывает случай, если пользователь не автор."""
-        if isinstance(self.get_object(), Post):
-            return redirect('blog:post_detail', post_id=self.kwargs['post_id'])
-        raise Http404("Объект не найден или недоступен")
 
 
 class PostListView(PublishedPostsMixin, ListView):
@@ -181,7 +154,7 @@ class CommentUpdateView(LoginRequiredMixin, AuthorCheckMixin, UpdateView):
     def get_success_url(self):
         """Перенаправляет на страницу поста после успешного редактирования."""
         return reverse_lazy('blog:post_detail', kwargs={
-                            'post_id': self.kwargs['post_id']})
+                            'post_id': self.object.post.id})
 
 
 class CommentDeleteView(LoginRequiredMixin, AuthorCheckMixin, DeleteView):
