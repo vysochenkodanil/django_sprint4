@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils import timezone
+from django.urls import reverse_lazy
 
 from .models import Post
 
@@ -33,3 +34,13 @@ class AuthorCheckMixin(UserPassesTestMixin):
         if isinstance(self.get_object(), Post):
             return redirect('blog:post_detail', post_id=self.kwargs['post_id'])
         raise Http404("Объект не найден или недоступен")
+
+
+class RedirectToPostMixin:
+    """Миксин для перенаправления на страницу поста."""
+
+    def get_success_url(self):
+        """Перенаправляет на страницу поста."""
+        return reverse_lazy('blog:post_detail', kwargs={
+            'post_id': self.kwargs['post_id']
+        })

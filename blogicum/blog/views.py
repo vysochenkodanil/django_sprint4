@@ -12,7 +12,7 @@ from django.views.generic import (
 )
 
 from .forms import CommentForm, EditProfileForm, PostForm
-from .mixins import AuthorCheckMixin, PublishedPostsMixin
+from .mixins import AuthorCheckMixin, PublishedPostsMixin, RedirectToPostMixin
 from .models import Category, Comment, Post
 
 User = get_user_model()
@@ -96,8 +96,10 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         """Перенаправляет на страницу профиля автора после создания поста."""
-        return reverse_lazy('blog:profile', kwargs={
-                            'username': self.request.user.username})
+        return reverse_lazy(
+            'blog:profile',
+            kwargs={'username': self.request.user.username}
+        )
 
 
 class PostUpdateView(LoginRequiredMixin, AuthorCheckMixin, UpdateView):
@@ -110,8 +112,10 @@ class PostUpdateView(LoginRequiredMixin, AuthorCheckMixin, UpdateView):
 
     def get_success_url(self):
         """Перенаправляет на страницу поста после успешного редактирования."""
-        return reverse_lazy('blog:post_detail', kwargs={
-                            'post_id': self.object.pk})
+        return reverse_lazy(
+            'blog:post_detail',
+            kwargs={'post_id': self.object.pk}
+        )
 
 
 class PostDeleteView(LoginRequiredMixin, AuthorCheckMixin, DeleteView):
@@ -123,7 +127,7 @@ class PostDeleteView(LoginRequiredMixin, AuthorCheckMixin, DeleteView):
     success_url = reverse_lazy('blog:index')
 
 
-class CommentCreateView(LoginRequiredMixin, CreateView):
+class CommentCreateView(LoginRequiredMixin, RedirectToPostMixin, CreateView):
     """Создание нового комментария."""
 
     model = Comment
@@ -137,33 +141,26 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
-    def get_success_url(self):
-        """Перенаправляет на страницу поста после создания комментария."""
-        return reverse_lazy('blog:post_detail', kwargs={
-                            'post_id': self.kwargs['post_id']})
 
-
-class CommentUpdateView(LoginRequiredMixin, AuthorCheckMixin, UpdateView):
+class CommentUpdateView(
+    LoginRequiredMixin, AuthorCheckMixin, RedirectToPostMixin, UpdateView
+):
     """Редактирование комментария."""
 
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
-    success_url = reverse_lazy('blog:index')
 
 
-class CommentDeleteView(LoginRequiredMixin, AuthorCheckMixin, DeleteView):
+class CommentDeleteView(
+    LoginRequiredMixin, AuthorCheckMixin, RedirectToPostMixin, DeleteView
+):
     """Удаление комментария."""
 
     model = Comment
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
-
-    def get_success_url(self):
-        """Перенаправляет на страницу поста после удаления комментария."""
-        return reverse_lazy('blog:post_detail', kwargs={
-                            'post_id': self.kwargs['post_id']})
 
     def get_context_data(self, **kwargs):
         """Не передаёт объект формы в контекст для страницы удаления."""
@@ -197,8 +194,9 @@ class ProfileView(DetailView):
                 category__is_published=True
             )
 
-        posts = posts.annotate(comment_count=Count(
-            'comments')).order_by('-pub_date')
+        posts = posts.annotate(
+            comment_count=Count('comments')
+        ).order_by('-pub_date')
         paginator = Paginator(posts, settings.POSTS_PER_PAGE)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -219,5 +217,7 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         """Перенаправляет на страницу профиля после редактирования."""
-        return reverse_lazy('blog:profile', kwargs={
-                            'username': self.request.user.username})
+        return reverse_lazy(
+            'blog:profile',
+            kwargs={'username': self.request.user.username}
+        )
